@@ -1,0 +1,10 @@
+.profile__add-image {
+  margin: 14px 64px 14px 64px;
+}
+
+@media screen and (max-width: 900px) {
+  .profile__add-image {
+    height: 16px;
+    width: 16px;
+  }
+}

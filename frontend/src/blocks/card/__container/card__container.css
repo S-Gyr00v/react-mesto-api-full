@@ -1,0 +1,10 @@
+.card__container {
+  padding-top: 0;
+  background-color: #ffffff;
+  display: flex;
+  border-radius: 0 0 10px 10px;
+  justify-content: space-between;
+  margin-top: 0;
+  align-items: center;
+  width: 282px;
+}

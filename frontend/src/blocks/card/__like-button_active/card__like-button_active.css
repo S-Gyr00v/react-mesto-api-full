@@ -1,0 +1,7 @@
+.card__like-button_active {
+  background-image: url("data:image/svg+xml,%3Csvg width='22' height='19' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M20.3 1.682c2.267 2.22 2.267 5.861 0 8.104L10.98 19 1.684 9.808A5.75 5.75 0 0 1 0 5.745C0 4.213.584 2.77 1.684 1.682 3.93-.561 7.612-.561 9.88 1.704l1.1 1.088 1.1-1.11c2.269-2.243 5.951-2.243 8.22 0Z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+.card__like-button_active:hover {
+  opacity: 1;
+}

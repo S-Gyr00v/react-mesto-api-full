@@ -1,0 +1,13 @@
+.popup__container_confirm {
+
+  max-height: 181px !important;
+
+}
+
+@media screen and (max-width: 900px) {
+  .popup__container_confirm {
+
+    max-height: 181px !important;
+   
+  }
+}
