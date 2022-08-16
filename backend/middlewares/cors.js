@@ -1,5 +1,5 @@
 const allowedCors = [
-  'http://localhost:3001',
+  'https://15pr.site',
 ];
 
 const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
