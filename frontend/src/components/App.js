@@ -24,7 +24,7 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [currentUser, setCurrentUser] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
@@ -32,6 +32,24 @@ function App() {
   const [isRegistered, setIsRegistered] = useState(null);
   const [isInfoTooltipPopupOpen, setIsInfoTooltipPopupOpen] = useState(false);
   const [tokenState, setTokenState] = useState("");
+  const [loader, setLoader] = useState(true)
+
+  useEffect(() => {
+    tokenCheck()
+  }, []);
+
+  useEffect(() => {
+    if (tokenState) {
+      Promise.all([api.getProfile(tokenState), api.getCards(tokenState)])
+        .then(([user, cards]) => {
+          setCurrentUser(user)
+          setEmail(user.user.email)
+          setCards(cards)
+          setLoader(false)
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [loggedIn])
 
   const handleEditProfileClick = () => {
     setIsEditProfilePopupOpen(true);
@@ -54,9 +72,8 @@ function App() {
   }
 
   function handleUpdateUser({ name, about }) {
-    const token = localStorage.getItem("jwt");
     api
-      .editProfile(name, about, token)
+      .editProfile(name, about, tokenState)
       .then((res) => {
         setCurrentUser(res);
         closeAllPopups();
@@ -65,9 +82,8 @@ function App() {
   }
 
   function handleUpdateAvatar({ avatar }) {
-    const token = localStorage.getItem("jwt");
     api
-      .updateAvatar(avatar, token)
+      .updateAvatar(avatar, tokenState)
       .then((res) => {
         setCurrentUser(res);
         closeAllPopups();
@@ -75,41 +91,12 @@ function App() {
       .catch((err) => console.log(err));
   }
 
-  useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if ([loggedIn]) {
-      console.log("res")
-    api
-      .getProfile(token)
-      .then((res) => {
-        setCurrentUser(res);
-      })
-      .catch((err) => console.log(err))}
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    api
-      .getCards(token)
-      .then((renderCard) => {
-        setCards(renderCard);
-      })
-      .catch((err) => console.log(err));
-  }, []);
-
-  useEffect (() => {
-    if (tokenState) {
-      tokenCheck()
-    }
-      }, [tokenState])
-
   function handleCardLike(card) {
-    const token = localStorage.getItem("jwt");
     // Снова проверяем, есть ли уже лайк на этой карточке
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    const isLiked = card.likes.some(id => id === currentUser.user._id);
     // Отправляем запрос в API и получаем обновлённые данные карточки
     api
-      .changeLikeCardStatus(card._id, !isLiked, token)
+      .changeLikeCardStatus(card._id, !isLiked, tokenState)
       .then((newCard) => {
         setCards((state) =>
           state.map((c) => (c._id === card._id ? newCard : c))
@@ -119,9 +106,8 @@ function App() {
   }
 
   function handleAddPlaceSubmit({ name, link }) {
-    const token = localStorage.getItem("jwt");
     api
-      .addCard(name, link, token)
+      .addCard(name, link, tokenState)
       .then((newCard) => {
         setCards([newCard, ...cards]);
         closeAllPopups();
@@ -130,33 +116,23 @@ function App() {
   }
 
   function handleCardDelete(card) {
-    const token = localStorage.getItem("jwt");
     api
-      .deleteCard(card._id, token)
+      .deleteCard(card._id, tokenState)
       .then(() => {
         setCards((state) => state.filter((с) => с._id !== card._id));
       })
       .catch((err) => console.log(err));
   }
 
-  useEffect(() => {
-    if (tokenState) {
-      tokenCheck()
-    }
-  }, []);
-
-
-
   const tokenCheck = () => {
     const jwt = localStorage.getItem("jwt");
-    // console.log("jwt", jwt)
+
     if (jwt) {
       Auth.getContent(jwt)
         .then((res) => {
-          console.log(res);
           if (res) {
-            setEmail(res.user.email);
             setLoggedIn(true);
+            setTokenState(jwt)
             history.push("/");
           }
         })
@@ -169,16 +145,14 @@ function App() {
       .then((res) => {
         localStorage.setItem("jwt", res.token);
         setLoggedIn(true);
-        history.push("/");
-        // tokenCheck();
         setTokenState(res.token)
+        history.push("/");
       })
       .catch((err) => {
         console.log(`Что-то пошло не так: ${err}`);
         setIsInfoTooltipPopupOpen(true);
       });
   }
-
 
   function handleRegister({ email, password }) {
     Auth.register(email, password)
@@ -218,16 +192,19 @@ function App() {
                 name="Выйти"
                 path="/sign-in"
               />
-              <Main
-                onEditProfile={handleEditProfileClick}
-                onAddPlace={handleAddPlaceClick}
-                onEditAvatar={handleEditAvatarClick}
-                onCardClick={handleCardClick}
-                cards={cards}
-                setCards={setCards}
-                onCardDelete={handleCardDelete}
-                onCardLike={handleCardLike}
-              />
+              {!loader &&
+                <Main
+                  onEditProfile={handleEditProfileClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onEditAvatar={handleEditAvatarClick}
+                  onCardClick={handleCardClick}
+                  cards={cards}
+                  setCards={setCards}
+                  onCardDelete={handleCardDelete}
+                  onCardLike={handleCardLike}
+                />
+              }
+
               <Footer className="footer" />
             </ProtectedRoute>
 
